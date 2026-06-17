@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin — KSΞN</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif; background: #f8f8f6; color: #1a1a1a; }
+        nav.admin-nav { position: relative; top: auto; left: auto; right: auto; height: auto; background: #1a1a1a !important; border-bottom: none; backdrop-filter: none; padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; }
+        .admin-nav h1 { color: #fff; font-size: 14px; font-weight: 300; letter-spacing: 4px; text-transform: uppercase; }
+        .admin-nav .nav-links a { color: #999; text-decoration: none; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; margin-left: 16px; transition: color .2s; }
+        .admin-nav .nav-links a:hover { color: #fff; }
+        .admin-container { max-width: 1000px; margin: 0 auto; padding: 40px 24px 60px; }
+        .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
+        .admin-header h2 { font-size: 20px; font-weight: 300; letter-spacing: 2px; text-transform: uppercase; }
+        .admin-header .back-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: #999; padding: 4px 8px; margin-right: 12px; }
+        .admin-header .back-btn:hover { color: #1a1a1a; }
+        .admin-header button { background: #1a1a1a; color: #fff; border: none; padding: 10px 24px; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: opacity .2s; }
+        .admin-header button:hover { opacity: .8; }
+        .admin-header .btn-outline { background: none; color: #999; border: 1px solid #ddd; }
+        .admin-header .btn-outline:hover { color: #1a1a1a; border-color: #1a1a1a; opacity: 1; }
+        .col-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+        .col-card { background: #fff; border: 1px solid #f0efed; padding: 32px 24px; cursor: pointer; transition: all .3s; display: flex; flex-direction: column; gap: 8px; }
+        .col-card:hover { border-color: #1a1a1a; }
+        .col-card h3 { font-size: 18px; font-weight: 400; letter-spacing: 1px; }
+        .col-card .col-count { font-size: 11px; color: #bbb; letter-spacing: 1px; text-transform: uppercase; }
+        .col-card-actions { display: flex; gap: 8px; margin-top: 8px; }
+        .col-card-actions button { background: none; border: 1px solid #ddd; padding: 6px 14px; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: all .2s; }
+        .col-card-actions .edit-btn { color: #1a1a1a; }
+        .col-card-actions .edit-btn:hover { border-color: #1a1a1a; }
+        .col-card-actions .delete-btn { color: #c00; }
+        .col-card-actions .delete-btn:hover { border-color: #c00; }
+        .prod-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+        .prod-card { background: #fff; border: 1px solid #f0efed; overflow: hidden; cursor: pointer; transition: all .3s; }
+        .prod-card:hover { border-color: #1a1a1a; }
+        .prod-card img { width: 100%; height: 240px; object-fit: cover; display: block; }
+        .prod-card-body { padding: 12px 16px 16px; }
+        .prod-card-body .look { font-size: 9px; color: #bbb; letter-spacing: 2px; text-transform: uppercase; }
+        .prod-card-body h4 { font-size: 13px; font-weight: 500; margin: 4px 0 2px; }
+        .prod-card-body .desc { font-size: 11px; color: #888; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .prod-card-actions { display: flex; gap: 6px; padding: 0 16px 14px; }
+        .prod-card-actions button { background: none; border: 1px solid #ddd; padding: 5px 12px; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: all .2s; }
+        .prod-card-actions .edit-btn { color: #1a1a1a; }
+        .prod-card-actions .edit-btn:hover { border-color: #1a1a1a; }
+        .prod-card-actions .delete-btn { color: #c00; }
+        .prod-card-actions .delete-btn:hover { border-color: #c00; }
+        .admin-empty { grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: #bbb; font-size: 13px; letter-spacing: 1px; }
+        .admin-form-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 200; padding: 20px; }
+        .admin-form-overlay.active { display: flex; }
+        .admin-form { background: #fff; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; padding: 40px; }
+        .admin-form h3 { font-size: 16px; font-weight: 400; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 24px; }
+        .admin-form label { display: block; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: #999; margin-bottom: 4px; margin-top: 16px; }
+        .admin-form label:first-of-type { margin-top: 0; }
+        .admin-form input, .admin-form textarea { width: 100%; padding: 10px 12px; border: 1px solid #ddd; font-size: 13px; font-family: inherit; background: #fafafa; outline: none; transition: border .2s; }
+        .admin-form input:focus, .admin-form textarea:focus { border-color: #1a1a1a; }
+        .admin-form textarea { resize: vertical; min-height: 60px; }
+        .dropzone { border: 2px dashed #ddd; padding: 20px; text-align: center; cursor: pointer; transition: all .2s; background: #fafafa; margin-top: 4px; min-height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .dropzone:hover, .dropzone.dragover { border-color: #1a1a1a; background: #f0f0ee; }
+        .dropzone.has-image { border-style: solid; border-color: #ddd; padding: 4px; }
+        .dropzone img { max-width: 100%; max-height: 200px; display: block; }
+        .dropzone .dz-text { font-size: 11px; color: #bbb; letter-spacing: 1px; }
+        .dropzone.has-image .dz-text { display: none; }
+        .admin-form-actions { display: flex; gap: 12px; margin-top: 24px; }
+        .admin-form-actions button { flex: 1; padding: 12px; border: none; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; }
+        .admin-form-actions .save-btn { background: #1a1a1a; color: #fff; }
+        .admin-form-actions .cancel-btn { background: none; border: 1px solid #ddd; color: #999; }
+        .admin-form-actions .save-btn:hover { opacity: .85; }
+        .admin-form-actions .cancel-btn:hover { color: #1a1a1a; border-color: #1a1a1a; }
+        .admin-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1a1a1a; color: #fff; padding: 12px 24px; font-size: 12px; letter-spacing: 1px; opacity: 0; transition: opacity .3s; z-index: 300; pointer-events: none; }
+        .admin-toast.show { opacity: 1; }
+        @media (max-width: 600px) {
+            .admin-nav { padding: 12px 16px; }
+            .admin-container { padding: 0 12px; margin: 20px auto; }
+            .col-grid { grid-template-columns: 1fr; }
+            .prod-grid { grid-template-columns: 1fr 1fr; }
+            .admin-form { padding: 24px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="admin-nav">
+        <h1>KSΞN — Admin</h1>
+        <div class="nav-links">
+            <a href="index.html">Site</a>
+            <a href="collection.html">Lookbook</a>
+        </div>
+    </nav>
+
+    <div class="admin-container" id="app">
+        <div id="viewMain">
+            <div class="admin-header">
+                <h2>Collections</h2>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <button class="btn-outline" onclick="exportData()">Export</button>
+                    <button class="btn-outline" onclick="importData()">Import</button>
+                    <button class="btn-outline" onclick="clearStorage()">Clear</button>
+                    <button onclick="openColForm()">+ Collection</button>
+                </div>
+            </div>
+            <div class="col-grid" id="colGrid"></div>
+        </div>
+
+        <div id="viewDetail" style="display:none;">
+            <div class="admin-header">
+                <div>
+                    <button class="back-btn" onclick="showMain()">&#8592;</button>
+                    <span id="detailTitle" style="font-size:20px;font-weight:300;letter-spacing:2px;text-transform:uppercase;"></span>
+                </div>
+                <button onclick="openProductForm()">+ Add Photo</button>
+            </div>
+            <div class="prod-grid" id="prodGrid"></div>
+        </div>
+    </div>
+
+    <div class="admin-form-overlay" id="formOverlay">
+        <div class="admin-form">
+            <h3 id="formTitle">Collection</h3>
+            <form id="mainForm" novalidate onsubmit="saveForm(event)">
+                <input type="hidden" id="formType" value="">
+                <input type="hidden" id="formId" value="">
+                <input type="hidden" id="formColId" value="">
+                <div id="formFields"></div>
+                <div class="admin-form-actions">
+                    <button type="button" class="cancel-btn" onclick="closeForm()">Cancel</button>
+                    <button type="submit" class="save-btn">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="admin-toast" id="toast"></div>
+
+    <script>
+        const DEFAULT_COLLECTIONS = [
+            { id: 0, name: "June" },
+            { id: 1, name: "July" },
+            { id: 2, name: "August" },
+            { id: 3, name: "0'9" },
+            { id: 4, name: "1'0" }
+        ];
+        const DEFAULT_PRODUCTS = [
+            { id: 0, image: "images/june.jpg", look: "Look 01", name: "Wool Tailored Blazer", desc: "Single-breasted blazer cut from Italian virgin wool.", materials: "100% Virgin Wool, Horn Buttons", model: "Ксения, 178 cm", fit: "True to size", collectionId: 0 },
+            { id: 1, image: "images/gallery-3.jpg", look: "Look 02", name: "Organic Cotton Shirt", desc: "Oversized button-down in organic cotton poplin.", materials: "100% Organic Cotton", model: "Ксения, 174 cm", fit: "Oversized fit", collectionId: 0 },
+            { id: 2, image: "images/june.jpg", look: "Look 03", name: "Silk Drape Dress", desc: "Floor-length dress in liquid silk crepe.", materials: "100% Silk Crepe", model: "Ксения, 176 cm", fit: "True to size", collectionId: 0 },
+            { id: 3, image: "images/July.jpg", look: "Look 04", name: "Linen Wide Trousers", desc: "High-waisted wide-leg trousers in linen blend.", materials: "70% Linen, 30% Cotton", model: "Ксения, 178 cm", fit: "True to size", collectionId: 1 },
+            { id: 4, image: "images/July (2).jpg", look: "Look 05", name: "Slate Double-Breasted Jacket", desc: "Double-breasted jacket in heavy wool crepe.", materials: "100% Wool Crepe", model: "Ксения, 174 cm", fit: "Tailored fit", collectionId: 1 },
+            { id: 5, image: "images/june.jpg", look: "Look 06", name: "Ivory Silk Blouse", desc: "Relaxed blouse in ivory silk charmeuse.", materials: "100% Silk Charmeuse", model: "Ксения, 176 cm", fit: "Relaxed fit", collectionId: 2 },
+            { id: 6, image: "images/june.jpg", look: "Look 07", name: "June Look", desc: "Light summer silhouette.", materials: "100% Linen", model: "—", fit: "Relaxed fit", collectionId: 2 },
+            { id: 7, image: "images/July.jpg", look: "Look 08", name: "Dark Silhouette", desc: "Bold black and red composition.", materials: "100% Wool", model: "—", fit: "Tailored fit", collectionId: 4 },
+            { id: 8, image: "images/July (2).jpg", look: "Look 09", name: "Pink Door Frame", desc: "Soft silhouette with architectural detail.", materials: "100% Linen", model: "—", fit: "Relaxed fit", collectionId: 3 }
+        ];
+
+        let activeColId = null;
+
+        function getCollections() {
+            const s = localStorage.getItem('ksen_collections');
+            if (s) { try { return JSON.parse(s); } catch(e) {} }
+            return DEFAULT_COLLECTIONS;
+        }
+        function saveCollections(c) { localStorage.setItem('ksen_collections', JSON.stringify(c)); }
+        function getProducts() {
+            const s = localStorage.getItem('ksen_products');
+            if (s) { try { return JSON.parse(s); } catch(e) {} }
+            return DEFAULT_PRODUCTS;
+        }
+        function saveProducts(p) { localStorage.setItem('ksen_products', JSON.stringify(p)); }
+
+        function renderCols() {
+            const cols = getCollections();
+            const products = getProducts();
+            const grid = document.getElementById('colGrid');
+            if (!cols.length) {
+                grid.innerHTML = '<div class="admin-empty">No collections. Click "+ Collection" to start.</div>';
+                return;
+            }
+            grid.innerHTML = cols.map(c => {
+                const count = products.filter(p => p.collectionId === c.id).length;
+                return `<div class="col-card" onclick="openCollection(${c.id})">
+                    <h3>${c.name}</h3>
+                    <div class="col-count">${count} photos</div>
+                    <div class="col-card-actions" onclick="event.stopPropagation()">
+                        <button class="edit-btn" onclick="openColForm(${c.id})">Edit</button>
+                        <button class="delete-btn" onclick="deleteCol(${c.id})">Delete</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function openCollection(colId) {
+            activeColId = colId;
+            const col = getCollections().find(c => c.id === colId);
+            if (!col) return;
+            document.getElementById('detailTitle').textContent = col.name;
+            document.getElementById('viewMain').style.display = 'none';
+            document.getElementById('viewDetail').style.display = 'block';
+            renderProducts();
+        }
+
+        function showMain() {
+            activeColId = null;
+            document.getElementById('viewDetail').style.display = 'none';
+            document.getElementById('viewMain').style.display = 'block';
+            renderCols();
+        }
+
+        function renderProducts() {
+            const products = getProducts();
+            const items = products.filter(p => p.collectionId === activeColId);
+            const grid = document.getElementById('prodGrid');
+            if (!items.length) {
+                grid.innerHTML = '<div class="admin-empty">No photos in this collection. Click "+ Add Photo".</div>';
+                return;
+            }
+            grid.innerHTML = items.map((p, i) => {
+                const realIdx = products.indexOf(p);
+                return `<div class="prod-card">
+                    <img src="${p.image}" alt="${p.name}" onerror="this.src='images/placeholder.svg'">
+                    <div class="prod-card-body">
+                        <div class="look">${p.look || '—'}</div>
+                        <h4>${p.name}</h4>
+                        <div class="desc">${p.desc || ''}</div>
+                    </div>
+                    <div class="prod-card-actions">
+                        <button class="edit-btn" onclick="openProductForm(${realIdx})">Edit</button>
+                        <button class="delete-btn" onclick="deleteProduct(${realIdx})">Delete</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function openColForm(colId) {
+            const col = colId !== undefined ? getCollections().find(c => c.id === colId) : null;
+            document.getElementById('formType').value = 'collection';
+            document.getElementById('formId').value = colId !== undefined ? colId : '';
+            document.getElementById('formColId').value = '';
+            document.getElementById('formTitle').textContent = col ? 'Edit Collection' : 'Add Collection';
+            document.getElementById('formFields').innerHTML = `
+                <label>Collection Name</label>
+                <input type="text" id="fldName" placeholder="June" value="${col ? col.name : ''}">
+            `;
+            document.getElementById('formOverlay').classList.add('active');
+        }
+
+        function openProductForm(prodIdx) {
+            const products = getProducts();
+            const p = prodIdx !== undefined ? products[prodIdx] : null;
+            document.getElementById('formType').value = 'product';
+            document.getElementById('formId').value = prodIdx !== undefined ? prodIdx : '';
+            document.getElementById('formColId').value = prodIdx === undefined && activeColId !== null ? activeColId : '';
+            const allCols = getCollections();
+            const currentColId = p ? p.collectionId : activeColId;
+            document.getElementById('formTitle').textContent = p ? 'Edit Photo' : 'Add Photo';
+            document.getElementById('formFields').innerHTML = `
+                <label>Look Label</label>
+                <input type="text" id="fldLook" placeholder="Look 01" value="${p ? (p.look || '') : ''}">
+                <label>Product Name</label>
+                <input type="text" id="fldName" placeholder="Wool Tailored Blazer" value="${p ? (p.name || '') : ''}">
+                <label>Photo</label>
+                <div class="dropzone${p && p.image ? ' has-image' : ''}" id="dropzone">
+                    ${p && p.image ? `<img src="${p.image}" id="dzPreview">` : ''}
+                    <span class="dz-text" id="dzText">${p && p.image ? '' : 'Drop image here or click to select'}</span>
+                </div>
+                <input type="file" id="fldFile" accept="image/*" style="display:none">
+                <input type="hidden" id="fldImage" value="${p ? (p.image || '') : ''}">
+                <label>Collection</label>
+                <select id="fldCollection" style="width:100%;padding:10px 12px;border:1px solid #ddd;font-size:13px;font-family:inherit;background:#fafafa;outline:none;">
+                    ${allCols.map(c => `<option value="${c.id}" ${c.id === currentColId ? 'selected' : ''}>${c.name}</option>`).join('')}
+                </select>
+                <label>Description</label>
+                <textarea id="fldDesc" placeholder="Product description..." rows="3">${p ? (p.desc || '') : ''}</textarea>
+                <label>Materials</label>
+                <input type="text" id="fldMaterials" placeholder="100% Virgin Wool" value="${p ? (p.materials || '') : ''}">
+                <label>Model</label>
+                <input type="text" id="fldModel" placeholder="Ксения, 178 cm" value="${p ? (p.model || '') : ''}">
+                <label>Fit</label>
+                <input type="text" id="fldFit" placeholder="True to size" value="${p ? (p.fit || '') : ''}">
+            `;
+            const dz = document.getElementById('dropzone');
+            const fileInput = document.getElementById('fldFile');
+            dz.addEventListener('click', () => fileInput.click());
+            dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
+            dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+            dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('dragover'); handleFile(e.dataTransfer.files[0]); });
+            fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
+            document.getElementById('formOverlay').classList.add('active');
+        }
+
+        function handleFile(file) {
+            if (!file) return showToast('No file');
+            const ext = file.name.split('.').pop().toLowerCase();
+            if (ext === 'heic' || ext === 'heif') return showToast('HEIC not supported — convert to JPG');
+            showToast('Processing image...');
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const rawDataUrl = e.target.result;
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    let w = img.width, h = img.height;
+                    const maxDim = 1200;
+                    if (w > maxDim || h > maxDim) {
+                        if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+                        else { w = Math.round(w * maxDim / h); h = maxDim; }
+                    }
+                    canvas.width = w; canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                    document.getElementById('fldImage').value = dataUrl;
+                    const dz = document.getElementById('dropzone');
+                    let prev = document.getElementById('dzPreview');
+                    if (!prev) { prev = document.createElement('img'); prev.id = 'dzPreview'; dz.insertBefore(prev, dz.firstChild); }
+                    prev.src = dataUrl;
+                    dz.classList.add('has-image');
+                    document.getElementById('dzText').style.display = 'none';
+                    showToast('Image ready');
+                };
+                img.onerror = function() {
+                    document.getElementById('fldImage').value = rawDataUrl;
+                    const dz = document.getElementById('dropzone');
+                    let prev = document.getElementById('dzPreview');
+                    if (!prev) { prev = document.createElement('img'); prev.id = 'dzPreview'; dz.insertBefore(prev, dz.firstChild); }
+                    prev.src = rawDataUrl;
+                    dz.classList.add('has-image');
+                    document.getElementById('dzText').style.display = 'none';
+                    showToast('Saved without compression');
+                };
+                img.src = rawDataUrl;
+            };
+            reader.onerror = function() { showToast('Failed to read file'); };
+            reader.readAsDataURL(file);
+        }
+        function closeForm() { document.getElementById('formOverlay').classList.remove('active'); }
+
+        function saveForm(e) {
+            e.preventDefault();
+            const type = document.getElementById('formType').value;
+            const id = document.getElementById('formId').value;
+            if (type === 'collection') {
+                const cols = getCollections();
+                const name = document.getElementById('fldName').value.trim();
+                if (!name) return showToast('Enter a name');
+                if (id !== '') {
+                    const col = cols.find(c => c.id === parseInt(id));
+                    if (col) col.name = name;
+                } else {
+                    cols.push({ id: cols.length ? Math.max(...cols.map(c => c.id)) + 1 : 0, name });
+                }
+                saveCollections(cols);
+                closeForm();
+                showMain();
+                showToast('Collection saved');
+            } else {
+                const products = getProducts();
+                const image = document.getElementById('fldImage').value;
+                if (!image) return showToast('Drop or select an image');
+                const data = {
+                    image: image,
+                    look: document.getElementById('fldLook').value,
+                    name: document.getElementById('fldName').value,
+                    desc: document.getElementById('fldDesc').value,
+                    materials: document.getElementById('fldMaterials').value,
+                    model: document.getElementById('fldModel').value,
+                    fit: document.getElementById('fldFit').value,
+                    collectionId: parseInt(document.getElementById('fldCollection').value)
+                };
+                if (id !== '') {
+                    const idx = parseInt(id);
+                    data.id = products[idx].id;
+                    products[idx] = data;
+                } else {
+                    data.id = products.length ? Math.max(...products.map(p => p.id)) + 1 : 0;
+                    products.push(data);
+                }
+                try { saveProducts(products); } catch(e) { return showToast('Storage full — use smaller photos'); }
+                closeForm();
+                renderProducts();
+                showToast('Photo saved');
+            }
+        }
+
+        function deleteCol(colId) {
+            if (!confirm('Delete this collection and remove all its photos?')) return;
+            let products = getProducts();
+            let cols = getCollections();
+            products = products.filter(p => p.collectionId !== colId);
+            cols = cols.filter(c => c.id !== colId);
+            saveProducts(products);
+            saveCollections(cols);
+            if (activeColId === colId) showMain();
+            else renderCols();
+            showToast('Collection deleted');
+        }
+
+        function deleteProduct(idx) {
+            if (!confirm('Delete this photo?')) return;
+            const products = getProducts();
+            products.splice(idx, 1);
+            saveProducts(products);
+            renderProducts();
+            showToast('Photo deleted');
+        }
+
+        function clearStorage() {
+            if (!confirm('Clear all stored data and reload?')) return;
+            localStorage.removeItem('ksen_products');
+            localStorage.removeItem('ksen_collections');
+            showMain();
+            showToast('Cleared — defaults loaded');
+        }
+
+        function exportData() {
+            const data = JSON.stringify({ products: getProducts(), collections: getCollections() }, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'ksen-backup.json';
+            a.click();
+            showToast('Exported successfully');
+        }
+
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    try {
+                        const data = JSON.parse(ev.target.result);
+                        if (!data.products || !data.collections) return showToast('Invalid backup file');
+                        saveProducts(data.products);
+                        saveCollections(data.collections);
+                        showMain();
+                        showToast('Imported successfully');
+                    } catch(err) { showToast('Invalid backup file'); }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2000);
+        }
+
+        renderCols();
+    </script>
+</body>
+</html>
