@@ -150,7 +150,7 @@
             { id: 1, name: "July", video: "" },
             { id: 2, name: "August", video: "" },
             { id: 3, name: "0'9", video: "" },
-            { id: 4, name: "1'0", video: "" }
+            { id: 4, name: "1'0", video: "images/cellection2.mp4" }
         ];
         const DEFAULT_PRODUCTS = [
             { id: 0, image: "images/june.jpg", look: "Look 01", name: "Wool Tailored Blazer", desc: "Single-breasted blazer cut from Italian virgin wool.", materials: "100% Virgin Wool, Horn Buttons", model: "Ксения, 178 cm", fit: "True to size", height: 600, size: "small", collectionId: 0 },
@@ -264,7 +264,7 @@
                 return;
             }
             grid.innerHTML = items.map((p, i) => {
-                const realIdx = products.indexOf(p);
+                const fullIdx = products.findIndex(x => x.id === p.id);
                 const first = i === 0;
                 const last = i === items.length - 1;
                 return `<div class="prod-card">
@@ -275,10 +275,10 @@
                         <div class="desc">${p.desc || ''}</div>
                     </div>
                     <div class="prod-card-actions">
-                        <button class="edit-btn" onclick="openProductForm(${realIdx})">Edit</button>
-                        <button class="delete-btn" onclick="deleteProduct(${realIdx})">Delete</button>
-                        <button class="edit-btn" onclick="moveProduct(${realIdx}, -1)" ${first ? 'disabled style="opacity:0.3"' : ''}>&#8593;</button>
-                        <button class="edit-btn" onclick="moveProduct(${realIdx}, 1)" ${last ? 'disabled style="opacity:0.3"' : ''}>&#8595;</button>
+                        <button class="edit-btn" onclick="openProductForm(${fullIdx})">Edit</button>
+                        <button class="delete-btn" onclick="deleteProduct(${fullIdx})">Delete</button>
+                        <button class="edit-btn" onclick="moveProduct(${p.id}, -1)" ${first ? 'disabled style="opacity:0.3"' : ''}>&#8593;</button>
+                        <button class="edit-btn" onclick="moveProduct(${p.id}, 1)" ${last ? 'disabled style="opacity:0.3"' : ''}>&#8595;</button>
                     </div>
                 </div>`;
             }).join('');
@@ -471,14 +471,17 @@
             showToast('Photo deleted');
         }
 
-        function moveProduct(idx, dir) {
+        function moveProduct(id, dir) {
             const products = getProducts();
-            const newIdx = idx + dir;
-            if (newIdx < 0 || newIdx >= products.length) return;
-            const thisColId = products[idx].collectionId;
-            const otherColId = products[newIdx].collectionId;
-            if (thisColId !== otherColId) return;
-            [products[idx], products[newIdx]] = [products[newIdx], products[idx]];
+            const idx = products.findIndex(p => p.id === id);
+            if (idx < 0) return;
+            const colItems = products.filter(p => p.collectionId === activeColId);
+            const colIdx = colItems.findIndex(p => p.id === id);
+            const newColIdx = colIdx + dir;
+            if (newColIdx < 0 || newColIdx >= colItems.length) return;
+            const targetId = colItems[newColIdx].id;
+            const targetIdx = products.findIndex(p => p.id === targetId);
+            [products[idx], products[targetIdx]] = [products[targetIdx], products[idx]];
             saveProducts(products);
             renderProducts();
         }

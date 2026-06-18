@@ -61,7 +61,7 @@ const DEFAULT_COLLECTIONS = [
     { id: 1, name: "July", video: "" },
     { id: 2, name: "August", video: "" },
     { id: 3, name: "0'9", video: "" },
-    { id: 4, name: "1'0", video: "" }
+    { id: 4, name: "1'0", video: "images/cellection2.mp4" }
 ];
 
 const DEFAULT_PRODUCTS = [
@@ -120,8 +120,9 @@ function renderCollections() {
         if (!items.length) return;
         if (col.video) {
             const vidSec = document.createElement('section');
-            vidSec.className = 'video-break';
-            vidSec.innerHTML = `<video class="full-video" autoplay muted loop playsinline poster="images/hero.jpg"><source src="${col.video}" type="video/mp4"></video>`;
+            vidSec.className = col.id === 4 ? 'video-break video-break-lg' : 'video-break';
+            vidSec.innerHTML = `<video class="full-video" autoplay muted loop playsinline poster="images/hero.jpg"><source src="${col.video}" type="video/mp4"></video>
+                <div class="video-collection-title"><span>${col.name}</span></div>`;
             container.appendChild(vidSec);
         }
         const sec = document.createElement('section');
