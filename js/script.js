@@ -212,6 +212,9 @@ function renderCollections() {
                     <video class="full-video" autoplay muted loop playsinline poster="images/hero.jpg"><source src="images/cellection2.mp4" type="video/mp4"></video>
                     <div style="position:absolute;top:24px;left:24px;z-index:3;font-size:13px;font-weight:300;letter-spacing:4px;text-transform:uppercase;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,0.5);background:rgba(0,0,0,0.3);padding:6px 14px;">${col.name}</div>
                 </section>
+                <section class="video-break" style="height:80vh;">
+                    <video class="full-video" autoplay muted loop playsinline poster="images/hero.jpg"><source src="images/collection.mp4" type="video/mp4"></video>
+                </section>
                 <div class="horizontal-gallery"><div class="gallery-track">${itemsHtml}</div></div>
                 <button class="gallery-arrow gallery-arrow-left" aria-label="Previous">&#8592;</button>
                 <button class="gallery-arrow gallery-arrow-right" aria-label="Next">&#8594;</button>`
