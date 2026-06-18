@@ -111,16 +111,20 @@
                     <span id="detailTitle" style="font-size:20px;font-weight:300;letter-spacing:2px;text-transform:uppercase;"></span>
                 </div>
                 <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                    <button onclick="openVideoForm()">+ Add Video</button>
+                    <button onclick="document.getElementById('fldVideoFile').click()">+ Add Video</button>
                     <button onclick="openProductForm()">+ Add Photo</button>
                 </div>
             </div>
             <div id="videoInfo" style="margin-bottom:16px;display:none;">
-                <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#fff;border:1px solid #f0efed;">
+                <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#fff;border:1px solid #f0efed;flex-wrap:wrap;">
                     <span style="font-size:11px;color:#999;letter-spacing:1px;">Video:</span>
                     <span id="videoPath" style="font-size:12px;color:#1a1a1a;flex:1;"></span>
+                    <div class="dropzone" id="videoDropzone" style="flex:1;min-height:60px;padding:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+                        <span class="dz-text" id="videoDzText" style="font-size:10px;">Drop video or click to select</span>
+                    </div>
                     <button onclick="removeVideo()" style="background:none;border:1px solid #ddd;padding:4px 10px;font-size:9px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;color:#c00;">Remove</button>
                 </div>
+                <input type="file" id="fldVideoFile" accept="video/mp4,video/webm,video/quicktime" style="display:none">
             </div>
             <div class="prod-grid" id="prodGrid"></div>
         </div>
@@ -217,6 +221,13 @@
             document.getElementById('viewDetail').style.display = 'block';
             updateVideoInfo();
             renderProducts();
+            const dz = document.getElementById('videoDropzone');
+            const fi = document.getElementById('fldVideoFile');
+            dz.onclick = () => fi.click();
+            dz.ondragover = e => { e.preventDefault(); dz.style.borderColor = '#1a1a1a'; dz.style.background = '#f0f0ee'; };
+            dz.ondragleave = () => { dz.style.borderColor = '#ddd'; dz.style.background = '#fafafa'; };
+            dz.ondrop = e => { e.preventDefault(); dz.style.borderColor = '#ddd'; dz.style.background = '#fafafa'; handleVideoFile(e.dataTransfer.files[0]); };
+            fi.onchange = () => { if (fi.files[0]) handleVideoFile(fi.files[0]); };
         }
 
         function updateVideoInfo() {
@@ -231,19 +242,23 @@
             }
         }
 
+        function handleVideoFile(file) {
+            if (!file) return showToast('No file');
+            const ext = file.name.split('.').pop().toLowerCase();
+            if (!['mp4','webm','mov'].includes(ext)) return showToast('Only MP4, WebM, MOV');
+            const path = 'images/' + file.name;
+            const cols = getCollections();
+            const c = cols.find(x => x.id === activeColId);
+            if (c) c.video = path;
+            saveCollections(cols);
+            document.getElementById('videoPath').textContent = path;
+            document.getElementById('videoInfo').style.display = 'block';
+            document.getElementById('videoDzText').textContent = '✓ ' + file.name;
+            showToast('Video saved — put ' + file.name + ' in images/ folder');
+        }
+
         function openVideoForm() {
-            const col = getCollections().find(c => c.id === activeColId);
-            const current = col ? col.video || '' : '';
-            const path = prompt('Video file path (e.g. images/my-video.mp4):', current);
-            if (path === null) return;
-            if (path.trim()) {
-                const cols = getCollections();
-                const c = cols.find(x => x.id === activeColId);
-                if (c) c.video = path.trim();
-                saveCollections(cols);
-                updateVideoInfo();
-                showToast('Video saved');
-            }
+            document.getElementById('fldVideoFile').click();
         }
 
         function removeVideo() {
