@@ -118,7 +118,12 @@ function renderCollections() {
     cols.forEach(col => {
         const items = products.filter(p => p.collectionId === col.id);
         if (!items.length) return;
-        if (col.video) {
+        if (col.id === 4) {
+            const spacer = document.createElement('div');
+            spacer.style.height = '60vh';
+            container.appendChild(spacer);
+        }
+        if (col.video && col.id !== 4) {
             const vidSec = document.createElement('section');
             vidSec.className = 'video-break';
             vidSec.innerHTML = `<video class="full-video" autoplay muted loop playsinline poster="images/hero.jpg"><source src="${col.video}" type="video/mp4"></video>`;
@@ -127,18 +132,24 @@ function renderCollections() {
         const sec = document.createElement('section');
         sec.className = 'gallery-section';
         sec.id = `col-${col.id}`;
-        sec.innerHTML = `<h2 class="collection-right-title">${col.name}</h2>
-            <div class="gallery-grid">
-                ${items.map(p => {
-                    const idx = products.indexOf(p);
-                    const size = p.size || 'small';
-                    const h = p.height || 600;
-                    const cls = size !== 'small' ? ' gallery-item size-' + size : ' gallery-item';
-                    return `<div class="${cls}" data-product="${idx}">
-                        <img src="${p.image}" class="gallery-img" style="height: ${h}px;">
-                    </div>`;
-                }).join('')}
+        const itemsHtml = items.map(p => {
+            const idx = products.indexOf(p);
+            const size = p.size || 'small';
+            const h = p.height || 600;
+            const cls = size !== 'small' ? ' gallery-item size-' + size : ' gallery-item';
+            return `<div class="${cls}" data-product="${idx}">
+                <img src="${p.image}" class="gallery-img" style="height: ${h}px;">
             </div>`;
+        }).join('');
+        sec.innerHTML = col.id === 4
+            ? `<h2 class="collection-right-title">${col.name}</h2>
+                <section class="video-break" style="height:80vh;position:relative;">
+                    <video class="full-video" autoplay muted loop playsinline poster="images/hero.jpg"><source src="images/cellection2.mp4" type="video/mp4"></video>
+                    <div style="position:absolute;top:24px;left:24px;z-index:3;font-size:13px;font-weight:300;letter-spacing:4px;text-transform:uppercase;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,0.5);background:rgba(0,0,0,0.3);padding:6px 14px;">${col.name}</div>
+                </section>
+                <div class="gallery-grid">${itemsHtml}</div>`
+            : `<h2 class="collection-right-title">${col.name}</h2>
+                <div class="gallery-grid">${itemsHtml}</div>`;
         container.appendChild(sec);
         navHtml.push(`<a href="#col-${col.id}" onclick="event.preventDefault();document.getElementById('col-${col.id}').scrollIntoView({behavior:'smooth'});return false;">${col.name}</a>`);
     });
