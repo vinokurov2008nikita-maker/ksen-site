@@ -189,11 +189,15 @@ function renderCollections() {
             const spacer = document.createElement('div');
             spacer.style.height = '60vh';
             container.appendChild(spacer);
+            const vid2 = document.createElement('section');
+            vid2.className = 'video-break';
+            vid2.innerHTML = `<video class="full-video" autoplay muted loop playsinline><source src="images/collection.mp4" type="video/mp4"></video>`;
+            container.appendChild(vid2);
         }
         if (col.video && col.id !== 4) {
             const vidSec = document.createElement('section');
             vidSec.className = 'video-break';
-            vidSec.innerHTML = `<video class="full-video" autoplay muted loop playsinline poster="images/hero.jpg"><source src="${col.video}" type="video/mp4"></video>`;
+            vidSec.innerHTML = `<video class="full-video" autoplay muted loop playsinline><source src="${col.video}" type="video/mp4"></video>`;
             container.appendChild(vidSec);
         }
         const sec = document.createElement('section');
@@ -209,7 +213,7 @@ function renderCollections() {
         sec.innerHTML = col.id === 4
             ? `<h2 class="collection-right-title">${col.name}</h2>
                 <section class="video-break" style="height:80vh;position:relative;">
-                    <video class="full-video" autoplay muted loop playsinline poster="images/hero.jpg"><source src="images/cellection2.mp4" type="video/mp4"></video>
+                    <video class="full-video" autoplay muted loop playsinline><source src="images/cellection2.mp4" type="video/mp4"></video>
                     <div style="position:absolute;top:24px;left:24px;z-index:3;font-size:13px;font-weight:300;letter-spacing:4px;text-transform:uppercase;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,0.5);background:rgba(0,0,0,0.3);padding:6px 14px;">${col.name}</div>
                 </section>
                 <div class="horizontal-gallery"><div class="gallery-track">${itemsHtml}</div></div>
