@@ -35,23 +35,82 @@ const revealObserver = new IntersectionObserver((entries) => {
 
 document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
-// ── Gallery (image click) ──
+// ── Horizontal Gallery Drag & Arrow ──
+function smoothScrollTo(el, targetX, duration) {
+    const start = el.scrollLeft;
+    const distance = targetX - start;
+    const startTime = performance.now();
+    function step(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const ease = 1 - Math.pow(1 - progress, 3);
+        el.scrollLeft = start + distance * ease;
+        if (progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+}
+
 function initGalleries() {
 document.querySelectorAll('.gallery-section').forEach(section => {
-    section.querySelectorAll('.gallery-img').forEach(img => {
-        img.addEventListener('click', () => {
-            const src = img.getAttribute('src');
-            if (!src) return;
-            const ov = document.createElement('div');
-            ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:999;display:flex;align-items:center;justify-content:center;cursor:zoom-out;';
-            const full = document.createElement('img');
-            full.src = src;
-            full.style.cssText = 'max-width:95vw;max-height:95vh;object-fit:contain;';
-            ov.appendChild(full);
-            ov.addEventListener('click', () => ov.remove());
-            document.body.appendChild(ov);
-        });
+    const track = section.querySelector('.gallery-track');
+    const galleryScroll = section.querySelector('.horizontal-gallery');
+    if (!track || !galleryScroll) return;
+
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+
+    track.addEventListener('mousedown', (e) => {
+        isDown = true;
+        startX = e.pageX - track.offsetLeft;
+        scrollLeft = galleryScroll.scrollLeft;
+        track.style.cursor = 'grabbing';
     });
+
+    track.addEventListener('mouseleave', () => {
+        isDown = false;
+        track.style.cursor = 'grab';
+    });
+
+    track.addEventListener('mouseup', () => {
+        isDown = false;
+        track.style.cursor = 'grab';
+    });
+
+    track.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - track.offsetLeft;
+        const walk = (x - startX) * 1.5;
+        galleryScroll.scrollLeft = scrollLeft - walk;
+    });
+
+    track.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].pageX - track.offsetLeft;
+        scrollLeft = galleryScroll.scrollLeft;
+    }, { passive: true });
+
+    track.addEventListener('touchmove', (e) => {
+        const x = e.touches[0].pageX - track.offsetLeft;
+        const walk = (x - startX) * 1.5;
+        galleryScroll.scrollLeft = scrollLeft - walk;
+    }, { passive: true });
+
+    const leftBtn = section.querySelector('.gallery-arrow-left');
+    const rightBtn = section.querySelector('.gallery-arrow-right');
+
+    function scrollGallery(dir) {
+        const item = track.querySelector('.gallery-item');
+        if (!item) return;
+        const itemWidth = item.offsetWidth;
+        const gap = 16;
+        const scrollAmount = itemWidth + gap;
+        const targetX = galleryScroll.scrollLeft + dir * scrollAmount;
+        smoothScrollTo(galleryScroll, targetX, 500);
+    }
+
+    if (leftBtn) leftBtn.addEventListener('click', () => scrollGallery(-1));
+    if (rightBtn) rightBtn.addEventListener('click', () => scrollGallery(1));
 });
 }
 
@@ -140,13 +199,11 @@ function renderCollections() {
         const sec = document.createElement('section');
         sec.className = 'gallery-section';
         sec.id = `col-${col.id}`;
-        const itemsHtml = items.map(p => {
+        const itemsHtml = items.map((p, pi) => {
             const idx = products.indexOf(p);
-            const size = p.size || 'small';
             const h = p.height || 600;
-            const cls = size !== 'small' ? ' gallery-item size-' + size : ' gallery-item';
-            return `<div class="${cls}" data-product="${idx}">
-                <img src="${p.image}" class="gallery-img" style="height: ${h}px;">
+            return `<div class="gallery-item" data-product="${idx}">
+                <img src="${p.image}" class="gallery-img" style="min-width: ${380 + pi * 30}px; height: ${h}px;">
             </div>`;
         }).join('');
         sec.innerHTML = col.id === 4
@@ -155,9 +212,13 @@ function renderCollections() {
                     <video class="full-video" autoplay muted loop playsinline poster="images/hero.jpg"><source src="images/cellection2.mp4" type="video/mp4"></video>
                     <div style="position:absolute;top:24px;left:24px;z-index:3;font-size:13px;font-weight:300;letter-spacing:4px;text-transform:uppercase;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,0.5);background:rgba(0,0,0,0.3);padding:6px 14px;">${col.name}</div>
                 </section>
-                <div class="gallery-grid">${itemsHtml}</div>`
+                <div class="horizontal-gallery"><div class="gallery-track">${itemsHtml}</div></div>
+                <button class="gallery-arrow gallery-arrow-left" aria-label="Previous">&#8592;</button>
+                <button class="gallery-arrow gallery-arrow-right" aria-label="Next">&#8594;</button>`
             : `<h2 class="collection-right-title">${col.name}</h2>
-                <div class="gallery-grid">${itemsHtml}</div>`;
+                <div class="horizontal-gallery"><div class="gallery-track">${itemsHtml}</div></div>
+                <button class="gallery-arrow gallery-arrow-left" aria-label="Previous">&#8592;</button>
+                <button class="gallery-arrow gallery-arrow-right" aria-label="Next">&#8594;</button>`;
         container.appendChild(sec);
         navHtml.push(`<a href="#col-${col.id}" onclick="event.preventDefault();document.getElementById('col-${col.id}').scrollIntoView({behavior:'smooth'});return false;">${col.name}</a>`);
     });
