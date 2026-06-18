@@ -79,6 +79,10 @@ const DEFAULT_PRODUCTS = [
 function getCollections() {
     const stored = localStorage.getItem('ksen_collections');
     if (stored) { try { return JSON.parse(stored); } catch(e) {} }
+    if (!localStorage.getItem('ksen_loaded')) {
+        localStorage.setItem('ksen_loaded', '1');
+        saveCollections(DEFAULT_COLLECTIONS);
+    }
     return DEFAULT_COLLECTIONS;
 }
 
