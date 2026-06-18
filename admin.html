@@ -264,6 +264,8 @@
             }
             grid.innerHTML = items.map((p, i) => {
                 const realIdx = products.indexOf(p);
+                const first = i === 0;
+                const last = i === items.length - 1;
                 return `<div class="prod-card">
                     <img src="${p.image}" alt="${p.name}" onerror="this.src='images/placeholder.svg'">
                     <div class="prod-card-body">
@@ -274,6 +276,8 @@
                     <div class="prod-card-actions">
                         <button class="edit-btn" onclick="openProductForm(${realIdx})">Edit</button>
                         <button class="delete-btn" onclick="deleteProduct(${realIdx})">Delete</button>
+                        <button class="edit-btn" onclick="moveProduct(${realIdx}, -1)" ${first ? 'disabled style="opacity:0.3"' : ''}>&#8593;</button>
+                        <button class="edit-btn" onclick="moveProduct(${realIdx}, 1)" ${last ? 'disabled style="opacity:0.3"' : ''}>&#8595;</button>
                     </div>
                 </div>`;
             }).join('');
@@ -464,6 +468,18 @@
             saveProducts(products);
             renderProducts();
             showToast('Photo deleted');
+        }
+
+        function moveProduct(idx, dir) {
+            const products = getProducts();
+            const newIdx = idx + dir;
+            if (newIdx < 0 || newIdx >= products.length) return;
+            const thisColId = products[idx].collectionId;
+            const otherColId = products[newIdx].collectionId;
+            if (thisColId !== otherColId) return;
+            [products[idx], products[newIdx]] = [products[newIdx], products[idx]];
+            saveProducts(products);
+            renderProducts();
         }
 
         function clearStorage() {
