@@ -51,6 +51,67 @@ function smoothScrollTo(el, targetX, duration) {
 }
 
 function initGalleries() {
+document.querySelectorAll('.gallery-section').forEach(section => {
+    const track = section.querySelector('.gallery-track');
+    const galleryScroll = section.querySelector('.horizontal-gallery');
+    if (!track || !galleryScroll) return;
+
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+
+    track.addEventListener('mousedown', (e) => {
+        isDown = true;
+        startX = e.pageX - track.offsetLeft;
+        scrollLeft = galleryScroll.scrollLeft;
+        track.style.cursor = 'grabbing';
+    });
+
+    track.addEventListener('mouseleave', () => {
+        isDown = false;
+        track.style.cursor = 'grab';
+    });
+
+    track.addEventListener('mouseup', () => {
+        isDown = false;
+        track.style.cursor = 'grab';
+    });
+
+    track.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - track.offsetLeft;
+        const walk = (x - startX) * 1.5;
+        galleryScroll.scrollLeft = scrollLeft - walk;
+    });
+
+    track.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].pageX - track.offsetLeft;
+        scrollLeft = galleryScroll.scrollLeft;
+    }, { passive: true });
+
+    track.addEventListener('touchmove', (e) => {
+        const x = e.touches[0].pageX - track.offsetLeft;
+        const walk = (x - startX) * 1.5;
+        galleryScroll.scrollLeft = scrollLeft - walk;
+    }, { passive: true });
+
+    const leftBtn = section.querySelector('.gallery-arrow-left');
+    const rightBtn = section.querySelector('.gallery-arrow-right');
+
+    function scrollGallery(dir) {
+        const item = track.querySelector('.gallery-item');
+        if (!item) return;
+        const itemWidth = item.offsetWidth;
+        const gap = 16;
+        const scrollAmount = itemWidth + gap;
+        const targetX = galleryScroll.scrollLeft + dir * scrollAmount;
+        smoothScrollTo(galleryScroll, targetX, 500);
+    }
+
+    if (leftBtn) leftBtn.addEventListener('click', () => scrollGallery(-1));
+    if (rightBtn) rightBtn.addEventListener('click', () => scrollGallery(1));
+});
 }
 
 // ── Collections & Products Data ──
@@ -122,30 +183,43 @@ function renderCollections() {
     container.innerHTML = '';
     const navHtml = [];
     cols.forEach(col => {
+        const items = products.filter(p => p.collectionId === col.id);
+        if (!items.length) return;
         if (col.id === 4) {
             const spacer = document.createElement('div');
             spacer.style.height = '60vh';
             container.appendChild(spacer);
         }
-        const vidSec = document.createElement('section');
-        vidSec.id = `col-${col.id}`;
-        if (col.id === 4) {
-            vidSec.className = 'video-break';
-            vidSec.style.height = '80vh';
-            vidSec.style.position = 'relative';
-            vidSec.innerHTML = `<video class="full-video" autoplay muted loop playsinline poster="images/hero.jpg"><source src="images/cellection2.mp4" type="video/mp4"></video>
-                <div style="position:absolute;top:24px;left:24px;z-index:3;font-size:13px;font-weight:300;letter-spacing:4px;text-transform:uppercase;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,0.5);background:rgba(0,0,0,0.3);padding:6px 14px;">${col.name}</div>`;
-        } else if (col.video) {
+        if (col.video && col.id !== 4) {
+            const vidSec = document.createElement('section');
             vidSec.className = 'video-break';
             vidSec.innerHTML = `<video class="full-video" autoplay muted loop playsinline poster="images/hero.jpg"><source src="${col.video}" type="video/mp4"></video>`;
-        } else {
-            vidSec.className = 'video-break';
-            vidSec.style.display = 'flex';
-            vidSec.style.alignItems = 'center';
-            vidSec.style.justifyContent = 'center';
-            vidSec.innerHTML = `<span style="font-size:11px;color:#bbb;letter-spacing:2px;text-transform:uppercase;">${col.name}</span>`;
+            container.appendChild(vidSec);
         }
-        container.appendChild(vidSec);
+        const sec = document.createElement('section');
+        sec.className = 'gallery-section';
+        sec.id = `col-${col.id}`;
+        const itemsHtml = items.map((p, pi) => {
+            const idx = products.indexOf(p);
+            const h = p.height || 600;
+            return `<div class="gallery-item" data-product="${idx}">
+                <img src="${p.image}" class="gallery-img" style="min-width: ${380 + pi * 30}px; height: ${h}px;">
+            </div>`;
+        }).join('');
+        sec.innerHTML = col.id === 4
+            ? `<h2 class="collection-right-title">${col.name}</h2>
+                <section class="video-break" style="height:80vh;position:relative;">
+                    <video class="full-video" autoplay muted loop playsinline poster="images/hero.jpg"><source src="images/cellection2.mp4" type="video/mp4"></video>
+                    <div style="position:absolute;top:24px;left:24px;z-index:3;font-size:13px;font-weight:300;letter-spacing:4px;text-transform:uppercase;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,0.5);background:rgba(0,0,0,0.3);padding:6px 14px;">${col.name}</div>
+                </section>
+                <div class="horizontal-gallery"><div class="gallery-track">${itemsHtml}</div></div>
+                <button class="gallery-arrow gallery-arrow-left" aria-label="Previous">&#8592;</button>
+                <button class="gallery-arrow gallery-arrow-right" aria-label="Next">&#8594;</button>`
+            : `<h2 class="collection-right-title">${col.name}</h2>
+                <div class="horizontal-gallery"><div class="gallery-track">${itemsHtml}</div></div>
+                <button class="gallery-arrow gallery-arrow-left" aria-label="Previous">&#8592;</button>
+                <button class="gallery-arrow gallery-arrow-right" aria-label="Next">&#8594;</button>`;
+        container.appendChild(sec);
         navHtml.push(`<a href="#col-${col.id}" onclick="event.preventDefault();document.getElementById('col-${col.id}').scrollIntoView({behavior:'smooth'});return false;">${col.name}</a>`);
     });
     if (nav) nav.innerHTML = navHtml.join('');
