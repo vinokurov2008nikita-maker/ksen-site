@@ -181,11 +181,9 @@ function renderCollections() {
         sec.id = `col-${col.id}`;
         const itemsHtml = items.map((p, pi) => {
             const idx = products.indexOf(p);
-            const sizes = [580, 460, 640, 420, 520];
-            const h = p.height || sizes[pi % sizes.length];
-            const w = 360 + (pi % 3) * 80 + (pi % 2) * 30;
+            const h = p.height || 600;
             return `<div class="gallery-item" data-product="${idx}">
-                <img src="${p.image}" class="gallery-img" style="min-width: ${w}px; height: ${h}px;">
+                <img src="${p.image}" class="gallery-img" style="min-width: ${380 + pi * 30}px; height: ${h}px;">
             </div>`;
         }).join('');
         sec.innerHTML = lastCol && col.id === lastCol.id
