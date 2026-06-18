@@ -120,9 +120,8 @@ function renderCollections() {
         if (!items.length) return;
         if (col.video) {
             const vidSec = document.createElement('section');
-            vidSec.className = col.id === 4 ? 'video-break video-break-lg' : 'video-break';
-            vidSec.innerHTML = `<video class="full-video" autoplay muted loop playsinline poster="images/hero.jpg"><source src="${col.video}" type="video/mp4"></video>
-                <div class="video-collection-title"><span>${col.name}</span></div>`;
+            vidSec.className = 'video-break';
+            vidSec.innerHTML = `<video class="full-video" autoplay muted loop playsinline poster="images/hero.jpg"><source src="${col.video}" type="video/mp4"></video>`;
             container.appendChild(vidSec);
         }
         const sec = document.createElement('section');
