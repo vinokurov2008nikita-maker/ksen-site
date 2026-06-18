@@ -93,6 +93,10 @@ function saveCollections(cols) {
 function getProducts() {
     const stored = localStorage.getItem('ksen_products');
     if (stored) { try { return JSON.parse(stored); } catch(e) {} }
+    if (!localStorage.getItem('ksen_loaded')) {
+        localStorage.setItem('ksen_loaded', '1');
+        saveProducts(DEFAULT_PRODUCTS);
+    }
     return DEFAULT_PRODUCTS;
 }
 
