@@ -509,13 +509,13 @@
         }
 
         function exportData() {
-            const data = JSON.stringify({ products: getProducts(), collections: getCollections() }, null, 2);
+            const data = JSON.stringify({ collections: getCollections(), products: getProducts() }, null, 2);
             const blob = new Blob([data], { type: 'application/json' });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
-            a.download = 'ksen-backup.json';
+            a.download = 'data.json';
             a.click();
-            showToast('Exported successfully');
+            showToast('Скачан data.json — залей в корень репозитория');
         }
 
         function importData() {

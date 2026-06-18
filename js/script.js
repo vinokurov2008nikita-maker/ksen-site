@@ -153,6 +153,33 @@ function saveProducts(products) {
     localStorage.setItem('ksen_products', JSON.stringify(products));
 }
 
+// ── Shared Data (loads from data.json so everyone sees the same) ──
+(async function loadShared() {
+    const container = document.getElementById('collections-container');
+    if (!container) return;
+    try {
+        const res = await fetch('data.json?' + Date.now());
+        if (res.ok) {
+            const data = await res.json();
+            if (data.collections) saveCollections(data.collections);
+            if (data.products) saveProducts(data.products);
+            localStorage.setItem('ksen_loaded', '1');
+        }
+    } catch(e) {}
+    if (!localStorage.getItem('ksen_loaded')) {
+        localStorage.setItem('ksen_loaded', '1');
+        saveCollections(DEFAULT_COLLECTIONS);
+        saveProducts(DEFAULT_PRODUCTS);
+    }
+    const id = new URLSearchParams(location.search).get('id');
+    if (id) {
+        const col = getCollections().find(c => c.id === parseInt(id));
+        const heroTitle = document.getElementById('heroTitle');
+        if (col && heroTitle) heroTitle.textContent = col.name;
+    }
+    renderCollections();
+})();
+
 // ── Visit Counter ──
 const counterEl = document.getElementById('visit-counter');
 if (counterEl) {
@@ -221,16 +248,8 @@ function renderCollections() {
     }
 }
 
-// Init galleries on index page (static), render on collection page (dynamic)
-if (document.getElementById('collections-container')) {
-    const id = new URLSearchParams(location.search).get('id');
-    if (id) {
-        const col = getCollections().find(c => c.id === parseInt(id));
-        const heroTitle = document.getElementById('heroTitle');
-        if (col && heroTitle) heroTitle.textContent = col.name;
-    }
-    renderCollections();
-} else {
+// Init galleries on index page (static)
+if (!document.getElementById('collections-container')) {
     initGalleries();
 }
 
