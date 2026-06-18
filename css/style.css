@@ -426,6 +426,9 @@ nav.scrolled {
 
 /* ── Horizontal Gallery ── */
 .gallery-section {
+}
+
+.gallery-wrapper {
     position: relative;
 }
 
@@ -563,6 +566,10 @@ nav.scrolled {
     width: 100%;
     height: 80vh;
     overflow: hidden;
+}
+
+.gallery-section .video-break {
+    margin-bottom: 60px;
 }
 
 .video-break video {

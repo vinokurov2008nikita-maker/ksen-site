@@ -116,21 +116,11 @@ document.querySelectorAll('.gallery-section').forEach(section => {
 
 // ── Collections & Products Data ──
 const DEFAULT_COLLECTIONS = [
-    { id: 0, name: "June", video: "" },
-    { id: 1, name: "July", video: "" },
-    { id: 2, name: "August", video: "" },
     { id: 3, name: "0'9", video: "" },
     { id: 4, name: "1'0", video: "images/cellection2.mp4" }
 ];
 
 const DEFAULT_PRODUCTS = [
-    { id: 0, image: "images/june.jpg", look: "Look 01", name: "Wool Tailored Blazer", desc: "Single-breasted blazer cut from Italian virgin wool. Structured shoulders with a softened waist.", materials: "100% Virgin Wool, Horn Buttons, Cupro lining", model: "Anna, 178 cm", fit: "True to size", height: 600, size: "small", collectionId: 0 },
-    { id: 1, image: "images/gallery-3.jpg", look: "Look 02", name: "Organic Cotton Shirt", desc: "Oversized button-down in organic cotton poplin. Extended cuffs, hidden placket.", materials: "100% Organic Cotton, Mother-of-Pearl Buttons", model: "Maria, 174 cm", fit: "Oversized fit", height: 600, size: "small", collectionId: 0 },
-    { id: 2, image: "images/gallery-3.jpg", look: "Look 03", name: "Silk Drape Dress", desc: "Floor-length dress in liquid silk crepe. Asymmetric neckline with a single draped sleeve.", materials: "100% Silk Crepe, Silk Organza trim", model: "Sofia, 176 cm", fit: "True to size", height: 600, size: "small", collectionId: 1 },
-    { id: 3, image: "images/July.jpg", look: "Look 04", name: "Linen Wide Trousers", desc: "High-waisted wide-leg trousers in linen blend. Pleated front with side pockets.", materials: "70% Linen, 30% Cotton, Cotton waistband", model: "Anna, 178 cm", fit: "True to size. High-waisted cut", height: 600, size: "small", collectionId: 1 },
-    { id: 4, image: "images/July (2).jpg", look: "Look 05", name: "Slate Double-Breasted Jacket", desc: "Double-breasted jacket in heavy wool crepe. Notched lapel, flap pockets.", materials: "100% Wool Crepe, Viscose lining", model: "Maria, 174 cm", fit: "Tailored fit", height: 600, size: "small", collectionId: 2 },
-    { id: 5, image: "images/june.jpg", look: "Look 06", name: "Ivory Silk Blouse", desc: "Relaxed blouse in ivory silk charmeuse. Deep V-neck with a self-tie front closure.", materials: "100% Silk Charmeuse, Shell Buttons", model: "Sofia, 176 cm", fit: "Relaxed fit", height: 600, size: "small", collectionId: 2 },
-    { id: 6, image: "images/june.jpg", look: "Look 07", name: "June Look", desc: "Light summer silhouette in soft ivory.", materials: "100% Linen", model: "—", fit: "Relaxed fit", height: 600, size: "small", collectionId: 0 },
     { id: 7, image: "images/July.jpg", look: "Look 08", name: "Dark Silhouette", desc: "Bold black and red composition.", materials: "100% Wool", model: "—", fit: "Tailored fit", height: 600, size: "small", collectionId: 4 },
     { id: 8, image: "images/July (2).jpg", look: "Look 09", name: "Pink Door Frame", desc: "Soft silhouette with architectural detail.", materials: "100% Linen", model: "—", fit: "Relaxed fit", height: 600, size: "small", collectionId: 3 }
 ];
@@ -182,47 +172,39 @@ function renderCollections() {
     const cols = [...collections].sort((a, b) => a.id - b.id);
     container.innerHTML = '';
     const navHtml = [];
+    const lastCol = cols.length ? cols.reduce((a, b) => a.id > b.id ? a : b) : null;
     cols.forEach(col => {
         const items = products.filter(p => p.collectionId === col.id);
         if (!items.length) return;
-        if (col.id === 4) {
-            const spacer = document.createElement('div');
-            spacer.style.height = '60vh';
-            container.appendChild(spacer);
-            const vid2 = document.createElement('section');
-            vid2.className = 'video-break';
-            vid2.innerHTML = `<video class="full-video" autoplay muted loop playsinline><source src="images/collection.mp4" type="video/mp4"></video>`;
-            container.appendChild(vid2);
-        }
-        if (col.video && col.id !== 4) {
-            const vidSec = document.createElement('section');
-            vidSec.className = 'video-break';
-            vidSec.innerHTML = `<video class="full-video" autoplay muted loop playsinline><source src="${col.video}" type="video/mp4"></video>`;
-            container.appendChild(vidSec);
-        }
         const sec = document.createElement('section');
         sec.className = 'gallery-section';
         sec.id = `col-${col.id}`;
         const itemsHtml = items.map((p, pi) => {
             const idx = products.indexOf(p);
-            const h = p.height || 600;
+            const sizes = [580, 460, 640, 420, 520];
+            const h = p.height || sizes[pi % sizes.length];
+            const w = 360 + (pi % 3) * 80 + (pi % 2) * 30;
             return `<div class="gallery-item" data-product="${idx}">
-                <img src="${p.image}" class="gallery-img" style="min-width: ${380 + pi * 30}px; height: ${h}px;">
+                <img src="${p.image}" class="gallery-img" style="min-width: ${w}px; height: ${h}px;">
             </div>`;
         }).join('');
-        sec.innerHTML = col.id === 4
-            ? `<h2 class="collection-right-title">${col.name}</h2>
-                <section class="video-break" style="height:80vh;position:relative;">
+        sec.innerHTML = lastCol && col.id === lastCol.id
+            ? `<section class="video-break" style="height:80vh;position:relative;">
                     <video class="full-video" autoplay muted loop playsinline><source src="images/cellection2.mp4" type="video/mp4"></video>
                     <div style="position:absolute;top:24px;left:24px;z-index:3;font-size:13px;font-weight:300;letter-spacing:4px;text-transform:uppercase;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,0.5);background:rgba(0,0,0,0.3);padding:6px 14px;">${col.name}</div>
                 </section>
-                <div class="horizontal-gallery"><div class="gallery-track">${itemsHtml}</div></div>
-                <button class="gallery-arrow gallery-arrow-left" aria-label="Previous">&#8592;</button>
-                <button class="gallery-arrow gallery-arrow-right" aria-label="Next">&#8594;</button>`
+                <h2 class="collection-right-title">${col.name}</h2>
+                <div class="gallery-wrapper">
+                    <div class="horizontal-gallery"><div class="gallery-track">${itemsHtml}</div></div>
+                    <button class="gallery-arrow gallery-arrow-left" aria-label="Previous">&#8592;</button>
+                    <button class="gallery-arrow gallery-arrow-right" aria-label="Next">&#8594;</button>
+                </div>`
             : `<h2 class="collection-right-title">${col.name}</h2>
-                <div class="horizontal-gallery"><div class="gallery-track">${itemsHtml}</div></div>
-                <button class="gallery-arrow gallery-arrow-left" aria-label="Previous">&#8592;</button>
-                <button class="gallery-arrow gallery-arrow-right" aria-label="Next">&#8594;</button>`;
+                <div class="gallery-wrapper">
+                    <div class="horizontal-gallery"><div class="gallery-track">${itemsHtml}</div></div>
+                    <button class="gallery-arrow gallery-arrow-left" aria-label="Previous">&#8592;</button>
+                    <button class="gallery-arrow gallery-arrow-right" aria-label="Next">&#8594;</button>
+                </div>`;
         container.appendChild(sec);
         navHtml.push(`<a href="#col-${col.id}" onclick="event.preventDefault();document.getElementById('col-${col.id}').scrollIntoView({behavior:'smooth'});return false;">${col.name}</a>`);
     });
